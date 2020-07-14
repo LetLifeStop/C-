@@ -1,3 +1,9 @@
+**字符在及其内容是通过位模式存储的，char类型专门用于存储这种字符型数据，当然任何整形也可以用于存储字符型数据，由于某些潜在的重要原因，我们再次使用int**
+
+​	~~这个 潜在的重要原因 现在不知道，等后续补充~~
+
+
+
 * 当想要输出 % 时，可以通过 printf("%%")实现	
 
 *  != 的运算优先级要比 = 的运算优先级要高
@@ -100,7 +106,185 @@
     }
     return 0;
   }
+  ```
   
+* 编写一个程序，以每行一个单词的形式打印其输入
+
+  ```c++
+  #include <bits/stdc++.h>
+  using namespace std;
+  int main()
+  {
+    int c;
+  
+    while((c = getchar()) != EOF) 
+    {
+      if(c == ' ' || c == '\n')
+      {
+        putchar('\n');
+        continue;
+      }
+      putchar(c);
+    }
+    return 0;
+  }      
   ```
 
+* 对于函数的参数，在C语言中传递给被调用函数的参数的值存放在临时变量中，而不是存放在原来的变量中。这样设置的作用即有利又有弊，缺点就是耗费空间，优点就是在某些情况下可以减少变量的申请。
+
+  ```c++
+  int pow(int base, int n) 
+  {
+    int p;
+    
+    for(p = 1; n > 0; --n)
+        p = p * n;
+   
+    return p;
+  }
+  ```
+
+  比如上面的例子，对n的操作不会影响到原来n的值。
+
+  如果要修改函数参数中对应的值，可以将原来变量的地址作为参数进行传入，函数要将对应的参数声明为指针类型 **从技术角度看，地址就是指向变量的指针**
+
+* 对于参数为数组时，传递给函数的是数组的起始位置，并不会复制数组本身
+
+* 练习：程序读入一组文本行，并把最长的文本行打印出来 
+
   
+
+  ```c++
+  // 封装getline函数，getline通过getchar实现
+  // 自己的版本
+    #include <stdio.h>
+    #define MAXLINE 100 
+    
+    void Getline(int c, char tmpSto[], char longest[]); 
+    void copy(char src[], char dst[], int len);
+    
+    int main()
+    {
+      int c;
+      char tmpSto[MAXLINE];
+      char longest[MAXLINE];
+    
+      Getline(c, tmpSto, longest);
+      
+      printf("the longest str is %s\n", longest);
+      return 0;
+    }
+    
+    void Getline(int c, char tmpSto[], char longest[])
+    {
+      int max_len = 0, len = 0;
+    
+      while((c = getchar()) != EOF) {
+        tmpSto[len++] = c;
+        if(c == '\n') 
+        {   
+          if(len > max_len) 
+          {
+            max_len = len;
+            copy(tmpSto, longest, len);
+          }
+          len = 0;
+        }
+      }
+      
+      return ;
+    }
+    
+    void copy(char src[], char dst[], int len) 
+    {
+      for(int i = 0; i < len; i++) 
+      {
+        dst[i] = src[i];
+      }                                                                                     
+      dst[len] = '\0';
+      printf("the dst is %s\n", dst);
+      return ;
+    }
+  ```
+
+  看了样例之后的改进版
+
+  ```c++
+  #include <stdio.h>
+    #define MAXLINE 100 
+    
+    void Getline(int c, char tmpSto[], char longest[]); 
+    void copy(char src[], char dst[], int len);
+    
+    int main()
+    {
+      int c;
+      char tmpSto[MAXLINE];
+      char longest[MAXLINE];
+    
+     Getline(c, tmpSto, longest);
+      
+      printf("the longest str is %s\n", longest);
+      return 0;
+    }
+    
+    void Getline(int c, char tmpSto[], char longest[])
+    {
+      int max_len = 0, len = 0;
+    
+      while((c = getchar()) != EOF) {
+        tmpSto[len++] = c;
+        if(c == '\n') 
+        {
+          tmpSto[len] = '\0';
+          if(len > max_len) 
+          {
+            max_len = len;
+            copy(tmpSto, longest, len);
+          }
+          len = 0;
+        }
+      }
+      
+      return ;
+    }
+    
+   void copy(char src[], char dst[], int len) 
+    {
+      int i = 0;
+      while((dst[i] = src[i]) != '\0')                               
+        i++;
+      return ;
+    }  
+  ```
+
+* 对比一下，在获得一个完整的行之后，忘记在Getline函数中加行终止符。 在copy函数中，可以写的更加简便一点
+
+* getline函数把字符'\0' [空字符，其值为0]，插入到它创建的数组末尾，用来标记字符串的结束，这是C语言的一个约定。
+
+* **对于上面的getline函数，还有一个可以再去考虑的地方**
+
+  ```c++
+  void Getline(int c, char tmpSto[], char longest[])
+    {
+      int max_len = 0, len = 0;
+    
+      while((c = getchar()) != EOF && len < limit/*limit参数可以作为函数参数再次加入*/) {
+        tmpSto[len++] = c;
+        if(c == '\n') 
+        {
+          tmpSto[len] = '\0';
+          if(len > max_len) 
+          {
+            max_len = len;
+            copy(tmpSto, longest, len);
+          }
+          len = 0;
+        }
+      }
+      
+      return ;
+    }
+  ```
+
+  **更新了这个之后，getline函数当数组满时，将停止读取字符**
